@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programming</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      overflow: hidden; /* Empêche le défilement de la page */
+    }
+
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align: center;">
+  <h1>Programming</h1>
+</div>
+
+<canvas id="gameCanvas" width="480" height="320"></canvas>
+
+<script>
+  // 
+  let canvas = document.getElementById("gameCanvas");
+  let ctx = canvas.getContext("2d");
+
+  // 
+  let ballRadius = 10;
+  let x = canvas.width / 2;
+  let y = canvas.height - 30;
+  let dx = 2;
+  let dy = -2;
+  let paddleHeight = 10;
+  let paddleWidth = 75;
+  let paddleX = (canvas.width - paddleWidth) / 2;
+  let brickRowCount = 3;
+  let brickColumnCount = 5;
+  let brickWidth = 75;
+  let brickHeight = 20;
+  let brickPadding = 10;
+  let brickOffsetTop = 30;
+  let brickOffsetLeft = 30;
+  let bricks = [];
+  let intervalId;
+
+  // 
+  function createBricks() {
+    for(let c = 0; c < brickColumnCount; c++) {
+      bricks[c] = [];
+      for(let r = 0; r < brickRowCount; r++) {
+        bricks[c][r] = { x: 0, y: 0, status: 1 }; // Les briques sont actives par défaut
+      }
+    }
+  }
+
+  // 
+  function initGame() {
+    createBricks();
+    x = canvas.width / 2;
+    y = canvas.height - 30;
+    dx = 2;
+    dy = -2;
+    paddleX = (canvas.width - paddleWidth) / 2;
+  }
+
+  // 
+  function drawBricks() {
+    for(let c = 0; c < brickColumnCount; c++) {
+      for(let r = 0; r < brickRowCount; r++) {
+        if(bricks[c][r].status == 1) {
+          let brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+          let brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+          bricks[c][r].x = brickX;
+          bricks[c][r].y = brickY;
+          ctx.beginPath();
+          ctx.rect(brickX, brickY, brickWidth, brickHeight);
+          ctx.fillStyle = "#FFFF00";
+          ctx.fill();
+          ctx.closePath();
+        }
+      }
+    }
+  }
+
+  // 
+  function collisionDetection() {
+    for(let c = 0; c < brickColumnCount; c++) {
+      for(let r = 0; r < brickRowCount; r++) {
+        let b = bricks[c][r];
+        if(b.status == 1) {
+          if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+            dy = -dy; // Inverse la direction de la balle
+            b.status = 0; // Désactive la brique
+          }
+        }
+      }
+    }
+  }
+
+  // 
+  function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "#FFFF00";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  // 
+  function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#FFFF00";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawBall();
+    drawPaddle();
+    collisionDetection();
+
+    
+    x += dx;
+    y += dy;
+
+    
+    if(x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+      dx = -dx; 
+    }
+
+   
+    if(y + dy < ballRadius) {
+      dy = -dy;
+    }
+
+    //
+    if(y + dy > canvas.height - ballRadius - paddleHeight) {
+      if(x > paddleX && x < paddleX + paddleWidth) {
+        dy = -dy; // Inverse la direction verticale
+      } else {
+        // Game over
+        clearInterval(intervalId); // Arrête le jeu
+        setTimeout(() => {
+          initGame(); // Réinitialise le jeu après 1 seconde
+          intervalId = setInterval(draw, 10); // Relance le jeu
+        }, 1000);
+      }
+    }
+
+    // 
+    if (x < paddleX + paddleWidth / 2 && paddleX > 0) {
+      paddleX -= 2;
+    } else if (x > paddleX + paddleWidth / 2 && paddleX < canvas.width - paddleWidth) {
+      paddleX += 2;
+    }
+
+    requestAnimationFrame(draw); // Redessine la scène à chaque frame
+  }
+
+  // start of the game
+  initGame();
+  intervalId = setInterval(draw, 10); // Démarre le dessin
+</script>
+
+<div style="text-align: center; margin-top: 20px;">
+  <p><strong>Explication du code :</strong></p>
+  <p>To create the brick-breaking game, I started by setting up a virtual playing field where a ball moves across the screen, breaking bricks and bouncing off walls. The gameplay involves a paddle at the bottom that the player moves to keep the ball in play. The visual part of the game includes colorful bricks that disappear when hit by the ball. Collision detection ensures that interactions between the ball, bricks, and walls work as expected, changing the ball’s direction and removing bricks upon contact. The game keeps updating these elements for smooth play and automatically restarts if the ball misses the paddle, keeping the challenge ongoing. </p>
+</div>
+<nav>
+	<ul>
+	  <li><a href="index.html"><button>Lobby </button></a></li>
+	  <li><a href="audio.html"><button>Audio</button></a></li>
+	  <li><a href="programming.html"><button>Programming</button></a></li>
+	  <li><a href="animation.html"><button>Animation</button></a></li>
+
+  </ul>
+  </nav>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</body>
+</html>
+
+
